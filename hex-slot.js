@@ -8,38 +8,38 @@ HexSlot.classExtend(Slot, {
   // 最小孔间距（中心距离）
   minCenters: function() {
     const size = this._params.size;
-    const rad = Math.PI/180;
     switch (this._params.pattern) {
       case 'd60':
         return size;
       case 'd45':
-        return size/Math.cos((60-45)*rad);
+        return size/cos((60-45)*RAD);
       case 'd90':
-        return size/Math.sin(60*rad);
+        return size/sin(60*RAD);
     }
     return Infinity;
   },
 
   prepareValues: function() {
-    this._radius = this._params.size/(2*Math.sin(60*Math.PI/180));
+    this._radius = this._params.size/(2*sin(60*RAD));
 
     return this;
   },
 
-  // 初始化布局参数
-  prepareLayout: function() {
-    this._centerX = this._params.size/2;
-    this._centerY = this._radius;
-    this._row = 0;
+  // 计算起始点
+  prepareOrigin: function() {
+    this._origin = [this._params.size/2, this._radius];
 
     return this;
   },
 
   // 画孔
-  draw: function() {
-    this._canvas.center(this._centerX, this._centerY).hex(this._radius);
+  draw: function(canvas) {
+    const r = this._radius*PPI;
 
-    return this.next();
+    this.getCentrePoints(canvas.width/PPI, canvas.height/PPI)
+      .forEach(point => canvas.center(point[0]*PPI, point[1]*PPI).hex(r));
+
+    return this;
   },
 
   // 文字描述

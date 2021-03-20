@@ -1,0 +1,98 @@
+* {
+  box-sizing: border-box;
+}
+.container {
+  display: block;
+  width: 1200px;
+  padding: 20px;
+  margin: 0 auto;
+}
+.canvas-wrapper {
+  height: 600px;
+  padding: 20px;
+  margin: 20px auto;
+  border: 1px solid #b1b1b1;
+  border-radius: 2px;
+}
+#plate {
+  width: 100%;
+  height: 100%;
+}
+#controller {
+  padding: 20px 0;
+  font-family: "Open Sans", sans-serif;
+  font-size: 14px;
+}
+.error {
+  margin: 5px;
+  color: red;
+}
+.form {
+  display: flex;
+  align-items: flex-start;
+  box-sizing: content-box;
+}
+.fields {
+  min-width: 160px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin: 5px;
+  background-color: #fbfbfb;
+  box-sizing: border-box;
+}
+.field {
+  display: flex;
+  align-items: center;
+  margin: 5px 0;
+}
+.field.input-field {
+  justify-content: space-between;
+}
+.field.input-field + .input-field {
+  margin-top: 20px;
+}
+.input-field label {
+  width: 80px;
+}
+.field input[type="text"] {
+  height: 18px;
+  width: 150px;
+}
+.field input {
+  margin: 0;
+}
+.field input + label {
+  margin-left: 3px;
+}
+.field label + input {
+  margin-left: .5em;
+}
+.btn {
+  margin: 5px;
+  padding: 10px 20px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  transition: all .3s ease-out;
+  border: 0;
+  outline: none;
+  text-shadow: none;
+  text-decoration: none;
+  border-radius: 2px;
+  background-color: #06879e;
+  color: #ffffff;
+  cursor: pointer;
+}
+.btn:hover {
+  background-color: #222222;
+}
+
+.drawing-description {
+  max-width: 300px;
+  margin: 5px;
+  margin-left: auto;
+}
+
+.drawing-description .content {
+  margin-bottom: 5px;
+}

@@ -6,12 +6,15 @@ function RoundEndSlot(parameters) {
 
 RoundEndSlot.classExtend(SquareEndSlot, {
   // 画孔
-  draw: function() {
-    const width = this._params.width;
-    const height = this._params.height;
-    this._canvas.center(this._centerX, this._centerY).roundRect(width, height, height/2);
+  draw: function(canvas) {
+    const width = this._params.width*PPI;
+    const height = this._params.height*PPI;
+    const radius = height/2;
 
-    return this.next();
+    this.getCentrePoints(canvas.width/PPI, canvas.height/PPI)
+      .forEach(point => canvas.center(point[0]*PPI, point[1]*PPI).roundRect(width, height, radius));
+
+    return this;
   },
 
   // 文字描述
@@ -29,6 +32,6 @@ RoundEndSlot.classExtend(SquareEndSlot, {
   slotArea: function() {
     const width = this._params.width;
     const height = this._params.height;
-    return width*(width-height*2)+Math.PI*((height/2)*(height/2));
+    return width*(width-height*2)+PI*((height/2)*(height/2));
   },
 });

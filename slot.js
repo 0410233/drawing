@@ -19,7 +19,9 @@ Slot.prototype = {
 
   // 验证尺寸
   validateSize: function() {
-    if (!this._params.size || this._params.size <= 0) {
+    const params = this._params;
+    params.size = toNumber(params.size);
+    if (params.size <= 0) {
       throw __('孔径无效');
     }
   },
@@ -34,9 +36,12 @@ Slot.prototype = {
 
   // 验证间距
   validateCenters: function() {
+    const params = this._params;
+    params.centers = toNumber(params.centers);
+
     const min = this.minCenters();
-    if (!this._params.centers || this._params.centers <= min) {
-      throw render(__('中心距必须大于 {min}'), {min: min});
+    if (params.centers <= min) {
+      throw render(__('中心距必须大于 {min}'), {min: min.toFixed(2)});
     }
   },
 
@@ -48,72 +53,96 @@ Slot.prototype = {
   // 准备绘制
   prepare: function() {
     this.prepareValues();
-    this.prepareOffset();
-    this.prepareLayout();
+    this.prepareOrigin();
+    this.prepareDelta();
+
+    return this;
   },
 
-  // 计算中间值（如果有的话）
   prepareValues: function() {
     return this;
   },
 
-  // 计算横向和纵向孔间距，以及初始偏移
-  prepareOffset: function() {
-    const size = this._params.size;
+  // 计算起始点
+  prepareOrigin: function() {
+    const size = this._params.size/2;
+    this._origin = [size, size];
+
+    return this;
+  },
+
+  // 计算相邻坐标偏移量
+  prepareDelta: function() {
     const centers = this._params.centers;
-    const rad = Math.PI/180;
+    this._delta = [[centers, 0]];
     switch (this._params.pattern) {
       case 'd60':
-        this._distanceX = centers*Math.cos(60*rad)*2;
-        this._distanceY = centers*Math.sin(60*rad);
-        this._offset = [size/2, size/2+this._distanceX/2];
+        this._delta.push(
+          [-1*centers*cos(60*RAD), -1*centers*sin(60*RAD)],
+          [-1*centers*cos(60*RAD), centers*sin(60*RAD)]
+        );
         break;
+
       case 'd45':
-        this._distanceX = centers*Math.cos(45*rad)*2;
-        this._distanceY = centers*Math.sin(45*rad);
-        this._offset = [size/2, size/2+this._distanceX/2];
+        this._delta.push(
+          [-1*centers*cos(45*RAD), -1*centers*sin(45*RAD)],
+          [-1*centers*cos(45*RAD), centers*sin(45*RAD)]
+        );
         break;
+
       case 'd90':
-        this._distanceX = centers;
-        this._distanceY = centers;
-        this._offset = [size/2, size/2];
+        this._delta.push(
+          [0, -centers],
+          [-centers, 0],
+          [0, centers]
+        );
         break;
     }
-
     return this;
   },
 
-  // 初始化布局参数
-  prepareLayout: function() {
-    const size = this._params.size;
-    this._centerX = size/2;
-    this._centerY = size/2;
-    this._row = 0;
+  // 获取指定范围内所有可用的坐标
+  getCentrePoints: function(width, height) {
+    const points = [];
+    const cache = {};
 
-    return this;
-  },
+    const origin = this._origin.slice();
+    points.push(origin);
+    cache[origin.join(',')] = true;
 
-  // 指定画布
-  onCanvas: function(canvas) {
-    this._canvas = canvas;
-    this._maxwidth = canvas.width;
-    this._maxheight = canvas.height;
+    let related = [], fresh = [origin];
+    while (true) {
+      related = [];
+      fresh.forEach(coords => {
+        related = related.concat(this.relatedCentrePoints(coords[0], coords[1]));
+      });
 
-    return this;
-  },
+      fresh = [];
+      related.forEach(coords => {
+        coords = [toNumber(coords[0].toFixed(6)), toNumber(coords[1].toFixed(6))];
+        const key = coords.join(',');
+        if (!cache[key] && this.isValidCentrePoint(coords[0], coords[1], width, height)) {
+          cache[key] = true;
+          points.push(coords);
+          fresh.push(coords)
+        }
+      });
 
-  // 计算下一个绘制点
-  next: function() {
-    this._centerX += this._distanceX;
-    if (this._centerX > this._maxwidth) {
-      this._row += 1;
-      this._centerX = this._offset[this._row%2];
-      this._centerY += this._distanceY;
+      if (! fresh.length) {
+        break;
+      }
     }
-    if (this._centerX > this._maxwidth || this._centerY > this._maxheight) {
-      return false;
-    }
-    return true;
+
+    return points;
+  },
+
+  isValidCentrePoint: function(x, y, width, height) {
+    return x >= 0 && x <= width && y >= 0 && y <= height;
+  },
+
+  // 获取与指定坐标相邻的坐标
+  relatedCentrePoints: function(x, y) {
+    return this._delta.map(delta => [x+delta[0], y+delta[1]]);
   },
 
   // 画孔
@@ -134,13 +163,12 @@ Slot.prototype = {
   // 开孔率
   openArea: function() {
     const centers = this._params.centers;
-    const rad = Math.PI/180;
     const slotArea = this.slotArea();
     switch (this._params.pattern) {
       case 'd60':
-        return (slotArea/2)/(centers*centers*Math.cos(60*rad)*Math.sin(60*rad));
+        return (slotArea/2)/(centers*centers*cos(60*RAD)*sin(60*RAD));
       case 'd45':
-        return (slotArea/2)/(centers*centers*Math.cos(45*rad)*Math.sin(45*rad));
+        return (slotArea/2)/(centers*centers*cos(45*RAD)*sin(45*RAD));
       case 'd90':
         return slotArea/(centers*centers);
     }

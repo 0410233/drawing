@@ -8,12 +8,11 @@ SquareSlot.classExtend(Slot, {
   // 最小孔间距（中心距离）
   minCenters: function() {
     const size = this._params.size;
-    const rad = Math.PI/180;
     switch (this._params.pattern) {
       case 'd60':
-        return size/Math.sin(60*rad);
+        return size/Math.sin(60*RAD);
       case 'd45':
-        return size/Math.sin(45*rad);
+        return size/Math.sin(45*RAD);
       case 'd90':
         return size;
     }
@@ -28,15 +27,18 @@ SquareSlot.classExtend(Slot, {
   },
 
   // 在下一个绘制点绘制
-  draw: function() {
-    const size = this._params.size;
-    this._canvas.center(this._centerX, this._centerY).rect(size, size);
+  draw: function(canvas) {
+    const r = this._params.size*PPI;
 
-    return this.next();
+    this.getCentrePoints(canvas.width/PPI, canvas.height/PPI)
+      .forEach(point => canvas.center(point[0]*PPI, point[1]*PPI).rect(r, r));
+
+    return this;
   },
 
   // 孔面积
   slotArea: function() {
-    return this._params.size*this._params.size;
+    const size = this._params.size;
+    return size*size;
   },
 });

@@ -8,8 +8,11 @@ SquareEndSlot.classExtend(Slot, {
 
   // 验证尺寸
   validateSize: function() {
-    if (!this._params.width || this._params.width <= 0 ||
-      !this._params.height || this._params.height <= 0) {
+    const params = this._params;
+    params.width = toNumber(params.width);
+    params.height = toNumber(params.height);
+
+    if (params.width <= 0 || params.height <= 0) {
       throw __('孔径无效');
     }
   },
@@ -24,72 +27,74 @@ SquareEndSlot.classExtend(Slot, {
 
   // 验证间距
   validateCenters: function() {
-    if (this._params.vert_gutter <= 0 || this._params.hori_gutter <= 0) {
+    const params = this._params;
+    params.vert_gutter = toNumber(params.vert_gutter);
+    params.hori_gutter = toNumber(params.hori_gutter);
+
+    if (params.vert_gutter <= 0 || params.hori_gutter <= 0) {
       throw __('间距必须大于 0');
     }
   },
 
-  // 计算横向和纵向孔间距，以及初始偏移
-  prepareOffset: function() {
+  prepareValues: function() {
     const params = this._params;
-
     this._distanceX = params.width+params.hori_gutter;
     this._distanceY = params.height+params.vert_gutter;
 
+    return this;
+  },
+
+  // 计算起始点
+  prepareOrigin: function() {
+    const params = this._params;
+    this._origin = [-params.width/2, -params.height/2];
+
+    return this;
+  },
+
+  // 计算相邻坐标偏移量
+  prepareDelta: function() {
+    const dx = this._distanceX;
+    const dy = this._distanceY;
     switch (this._params.pattern) {
       case 'hori':
-        this._offset = [params.width/2, params.width/2+this._distanceX/2];
+        this._delta = [
+          [dx, 0],
+          [-dx/2, -dy],
+          [-dx/2, dy],
+        ];
         break;
+
       case 'vert':
-        this._offset = [params.height/2, params.height/2+this._distanceY/2];
+        this._delta = [
+          [0, dy],
+          [-dx, -dy/2],
+          [dx, -dy/2],
+        ];
         break;
+
       case 'd90':
-        this._offset = [params.width/2, params.width/2];
+        this._delta = [
+          [dx, 0],
+          [0, -dy],
+          [-dx, 0],
+          [0, dy],
+        ];
         break;
     }
 
     return this;
-  },
-
-  // 初始化布局参数
-  prepareLayout: function() {
-    const params = this._params;
-    this._centerX = params.width/2;
-    this._centerY = params.height/2;
-    this._row = 0;
-
-    return this;
-  },
-
-  // 计算下一个绘制点
-  next: function() {
-    const vert = this._params.pattern === 'vert';
-
-    const row = vert ? '_centerY' : '_centerX';
-    const col = vert ? '_centerX' : '_centerY';
-    const rowmax = vert ? this._maxheight : this._maxwidth;
-    const colmax = vert ? this._maxwidth : this._maxheight;
-    const rowOffset = vert ? this._distanceY : this._distanceX;
-    const colOffset = vert ? this._distanceX : this._distanceY;
-
-    this[row] += rowOffset;
-    if (this[row] > rowmax) {
-      this._row += 1;
-      this[row] = this._offset[this._row%2];
-      this[col] += colOffset;
-    }
-
-    if (this[row] > rowmax || this[col] > colmax) {
-      return false;
-    }
-    return true;
   },
 
   // 画孔
   draw: function() {
-    this._canvas.center(this._centerX, this._centerY).rect(this._params.width, this._params.height);
+    const width = this._params.width*PPI;
+    const height = this._params.height*PPI;
 
-    return this.next();
+    this.getCentrePoints(canvas.width/PPI, canvas.height/PPI)
+      .forEach(point => canvas.center(point[0]*PPI, point[1]*PPI).rect(width, height));
+
+    return this;
   },
 
   // 文字描述

@@ -68,3 +68,16 @@ function render(template, parameters) {
 function inchToPx(inch) {
   return inch*100;
 }
+
+function toNumber(val) {
+  val = typeof val === 'number' ? val : parseFloat(val);
+  return isFinite(val) ? val : 0;
+}
+
+const PI = Math.PI;
+const RAD = PI/180;
+const cos = Math.cos;
+const sin = Math.sin;
+
+// px per inch
+const PPI = 100;

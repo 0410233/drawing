@@ -5,29 +5,56 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Canvas</title>
-  <style>
-    #drawing {
-      width: 800px;
-      height: 480px;
-      margin: 60px auto;
-    }
-    .canvas-wrapper {
-      display: block;
-      border: 1px solid #b1b1b1;
-      border-radius: 2px;
-      padding: 20px;
-    }
-    #canvas {
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="canvas-wrapper" id="drawing">
-    <canvas id="canvas"></canvas>
+  <div class="container">
+    <div class="canvas-wrapper">
+      <canvas id="plate"></canvas>
+    </div>
+    <div id="controller">
+      <div class="form">
+        <div class="fields slot-type-fields">
+          <div class="field radio-field" v-for="(meta, name) in types">
+            <input type="radio" v-model="slot.type" :value="name" :id="'slot_type__'+name"><label :for="'slot_type__'+name">{{ meta.label }}</label>
+          </div>
+        </div>
+        <div class="fields slot-layout-fields">
+          <div class="field input-field" v-if="typeProps.indexOf('size') >= 0">
+            <label for="slot_size">Hole Size:</label><input type="number" v-model="slot.size" id="slot_size">
+          </div>
+          <div class="field input-field" v-if="typeProps.indexOf('centers') >= 0">
+            <label for="slot_centers">Centers:</label><input type="number" v-model="slot.centers" id="slot_centers">
+          </div>
+          <div class="field input-field" v-if="typeProps.indexOf('height') >= 0">
+            <label for="slot_height">Slot Width:</label><input type="number" v-model="slot.height" id="slot_height">
+          </div>
+          <div class="field input-field" v-if="typeProps.indexOf('width') >= 0">
+            <label for="slot_width">Slot Length:</label><input type="number" v-model="slot.width" id="slot_width">
+          </div>
+          <div class="field input-field" v-if="typeProps.indexOf('vert_gutter') >= 0">
+            <label for="vert_gutter">Side Bar:</label><input type="number" v-model="slot.vert_gutter" id="slot_vert_gutter">
+          </div>
+          <div class="field input-field" v-if="typeProps.indexOf('hori_gutter') >= 0">
+            <label for="hori_gutter">End Bar:</label><input type="number" v-model="slot.hori_gutter" id="slot_hori_gutter">
+          </div>
+        </div>
+        <div class="fields">
+          <div class="field radio-field" v-for="pattern in typePatterns">
+            <input type="radio" v-model="slot.pattern" :value="pattern.name" :id="'pattern__'+pattern.name"><label :for="'pattern__'+pattern.name">{{ pattern.label }}</label>
+          </div>
+        </div>
+        <button id="btn_draw" class="btn" @click.stop="draw">Draw</button>
+        <div class="drawing-description" v-if="message.desc">
+          <div class="content"><b>{{ message.desc }}</b></div>
+          <div class="content">{{ message.psi.toFixed(2) }} Holes PSI</div>
+          <div class="content">{{ (message.oa*100).toFixed(2) }}% Open Area</div>
+        </div>
+      </div>
+      <div class="error" v-if="message.error">{{ message.error }}</div>
+    </div>
   </div>
+
   <script src="./utils.js"></script>
   <script src="./slot.js"></script>
   <script src="./round-slot.js"></script>
@@ -36,45 +63,168 @@
   <script src="./square-end-slot.js"></script>
   <script src="./round-end-slot.js"></script>
   <script src="./canvas.js"></script>
+  <script src="./vue.min.js"></script>
   <script>
     // 生成画布对象
     const canvas = new Canvas('canvas');
 
-    const square = new SquareSlot({
-      size: 60,
-      centers: 120,
-      pattern: 'd45',
+    const controller = new Vue({
+      el: '#controller',
+      data: function() {
+        return {
+          slot: {
+            type: 'round',
+            pattern: 'd60',
+            size: null,
+            centers: null,
+            width: null,
+            height: null,
+            vert_gutter: null,
+            hori_gutter: null,
+          },
+          message: {
+            error: null,
+            desc: null,
+            psi: null,
+            oa: null,
+          },
+          types: {
+            'round': {
+              label: 'Round',
+              props: ['size','centers'],
+              patterns: ['d60','d45','d90'],
+            },
+            'square': {
+              label: 'Square',
+              props: ['size','centers'],
+              patterns: ['d60','d45','d90'],
+            },
+            'hex': {
+              label: 'Hex',
+              props: ['size','centers'],
+              patterns: ['d60','d45','d90'],
+            },
+            'square-end': {
+              label: 'Square End',
+              props: ['width','height','vert_gutter','hori_gutter'],
+              patterns: ['hori','vert','d90'],
+            },
+            'round-end': {
+              label: 'Round End',
+              props: ['width','height','vert_gutter','hori_gutter'],
+              patterns: ['hori','vert','d90'],
+            },
+          },
+          patterns: {
+            d60: '60 Deg',
+            d45: '45 Deg',
+            hori: 'Side Staggered',
+            vert: 'End Staggered',
+            d90: 'Straight',
+          },
+        };
+      },
+
+      computed: {
+        typeProps: function() {
+          const meta = this.types[this.slot.type];
+          return meta && meta.props || [];
+        },
+
+        typePatterns: function() {
+          const meta = this.types[this.slot.type];
+          if (!meta) {
+            return [];
+          }
+          const patterns = this.patterns;
+          return meta.patterns.map(pattern => {return {name:pattern,label:patterns[pattern]}});
+        },
+      },
+
+      methods: {
+        draw: function() {
+          const msg = this.message;
+          msg.error = null;
+          msg.desc = null;
+          msg.psi = null;
+          msg.oa = null;
+
+          const props = {
+            pattern: this.slot.pattern,
+          };
+          this.typeProps.forEach(prop => {
+            props[prop] = parseFloat(this.slot[prop]) || 0;
+          });
+
+          let slot = null;
+          try {
+            switch (this.slot.type) {
+              case 'round':
+                slot = new RoundSlot(props);
+                break;
+              case 'square':
+                slot = new SquareSlot(props);
+                break;
+              case 'hex':
+                slot = new HexSlot(props);
+                break;
+              case 'round-end':
+                slot = new RoundEndSlot(props);
+                break;
+              case 'square-end':
+                slot = new SquareEndSlot(props);
+                break;
+            }
+            if (slot) {
+              canvas.clear().fillStyle('#0d4c61');
+              slot.draw(canvas);
+              msg.desc = slot.description();
+              msg.psi = slot.holesPerSquareInch();
+              msg.oa = slot.openArea();
+            }
+          } catch (error) {
+            this.message.error = error;
+            console.error(error);
+          }
+        },
+      },
     });
 
-    const round = new RoundSlot({
-      size: 60,
-      centers: 120,
-      pattern: 'd45',
-    });
+    // const square = new SquareSlot({
+    //   size: 60,
+    //   centers: 120,
+    //   pattern: 'd45',
+    // });
 
-    const hex = new HexSlot({
-      size: 40,
-      centers: 80,
-      pattern: 'd60',
-    });
+    // const round = new RoundSlot({
+    //   size: 60,
+    //   centers: 120,
+    //   pattern: 'd45',
+    // });
 
-    const squareEnd = new SquareEndSlot({
-      width: 80,
-      height: 40,
-      hori_gutter: 40,
-      vert_gutter: 20,
-      pattern: 'hori',
-    });
+    // const hex = new HexSlot({
+    //   size: 40,
+    //   centers: 80,
+    //   pattern: 'd90',
+    // });
 
-    const roundEnd = new RoundEndSlot({
-      width: 80,
-      height: 40,
-      hori_gutter: 40,
-      vert_gutter: 20,
-      pattern: 'hori',
-    });
+    // const squareEnd = new SquareEndSlot({
+    //   width: 80,
+    //   height: 40,
+    //   hori_gutter: 40,
+    //   vert_gutter: 20,
+    //   pattern: 'hori',
+    // });
 
-    canvas.fillStyle('#0d4c61').printSlots(hex);
+    // const roundEnd = new RoundEndSlot({
+    //   width: 80,
+    //   height: 40,
+    //   hori_gutter: 40,
+    //   vert_gutter: 20,
+    //   pattern: 'hori',
+    // });
+
+    // canvas.fillStyle('#0d4c61').printSlots(hex);
   </script>
 </body>
 </html>
