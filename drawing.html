@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canvas</title>
+  <style>
+    #drawing {
+      width: 800px;
+      height: 480px;
+      margin: 60px auto;
+    }
+    .canvas-wrapper {
+      display: block;
+      border: 1px solid #b1b1b1;
+      border-radius: 2px;
+      padding: 20px;
+    }
+    #canvas {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="canvas-wrapper" id="drawing">
+    <canvas id="canvas"></canvas>
+  </div>
+  <script src="./utils.js"></script>
+  <script src="./slot.js"></script>
+  <script src="./round-slot.js"></script>
+  <script src="./square-slot.js"></script>
+  <script src="./hex-slot.js"></script>
+  <script src="./square-end-slot.js"></script>
+  <script src="./round-end-slot.js"></script>
+  <script src="./canvas.js"></script>
+  <script>
+    // 生成画布对象
+    const canvas = new Canvas('canvas');
+
+    const square = new SquareSlot({
+      size: 60,
+      centers: 120,
+      pattern: 'd45',
+    });
+
+    const round = new RoundSlot({
+      size: 60,
+      centers: 120,
+      pattern: 'd45',
+    });
+
+    const hex = new HexSlot({
+      size: 40,
+      centers: 80,
+      pattern: 'd60',
+    });
+
+    const squareEnd = new SquareEndSlot({
+      width: 80,
+      height: 40,
+      hori_gutter: 40,
+      vert_gutter: 20,
+      pattern: 'hori',
+    });
+
+    const roundEnd = new RoundEndSlot({
+      width: 80,
+      height: 40,
+      hori_gutter: 40,
+      vert_gutter: 20,
+      pattern: 'hori',
+    });
+
+    canvas.fillStyle('#0d4c61').printSlots(hex);
+  </script>
+</body>
+</html>
