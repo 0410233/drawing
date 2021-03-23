@@ -8,8 +8,8 @@
   margin: 0 auto;
 }
 .canvas-wrapper {
-  height: 600px;
-  padding: 20px;
+  height: 642px;
+  padding: 20px 15px;
   margin: 20px auto;
   border: 1px solid #b1b1b1;
   border-radius: 2px;
@@ -43,20 +43,20 @@
 .field {
   display: flex;
   align-items: center;
-  margin: 5px 0;
+  margin: 7px 0;
 }
 .field.input-field {
   justify-content: space-between;
 }
 .field.input-field + .input-field {
-  margin-top: 20px;
+  margin-top: 15px;
 }
 .input-field label {
   width: 80px;
 }
-.field input[type="text"] {
-  height: 18px;
-  width: 150px;
+.field input[type="number"] {
+  height: 22px;
+  width: 120px;
 }
 .field input {
   margin: 0;

@@ -5,33 +5,47 @@ function RoundEndSlot(parameters) {
 }
 
 RoundEndSlot.classExtend(SquareEndSlot, {
+
   // 画孔
   draw: function(canvas) {
     const width = this._params.width*PPI;
     const height = this._params.height*PPI;
     const radius = height/2;
 
-    this.getCentrePoints(canvas.width/PPI, canvas.height/PPI)
+    this.getCentres(canvas.width/PPI, canvas.height/PPI)
       .forEach(point => canvas.center(point[0]*PPI, point[1]*PPI).roundRect(width, height, radius));
 
     return this;
   },
 
+  // 可用属性
+  getAvailableProps: function() {
+    return ['width','height','vert_gutter','hori_gutter'];
+  },
+
+  // 可用形制
+  getAvailablePatterns: function() {
+    return ['hori','vert','d90'];
+  },
+
   // 文字描述
-  description: function() {
+  getDescription: function() {
     const params = this._params;
-    const patterns = {
-      vert: 'End Staggered',
-      hori: 'Side Staggered',
-      d90: 'Straight Centers',
-    };
-    return `${params.width}" X ${params.height}" Round End Slot with ${params.vert_gutter}" Side Bars and ${params.hori_gutter} End Bars, ${patterns[params.pattern]}`;
+    const msg = render('{width}" X {height}" Round End Slot with {vert_gutter}" Side Bars and {hori_gutter} End Bars', params);
+    switch (params.pattern) {
+      case 'vert':
+        return msg+', End Staggered';
+      case 'hori':
+        return msg+', Side Staggered';
+      case 'd90':
+        return msg+', Straight Centers';
+    }
   },
 
   // 孔面积
-  slotArea: function() {
+  getSlotArea: function() {
     const width = this._params.width;
     const height = this._params.height;
-    return width*(width-height*2)+PI*((height/2)*(height/2));
+    return width*(width-height)+PI*(height/2)*(height/2);
   },
 });

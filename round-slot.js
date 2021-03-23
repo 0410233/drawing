@@ -9,21 +9,31 @@ RoundSlot.classExtend(Slot, {
   draw: function(canvas) {
     const r = this._params.size*PPI/2;
 
-    this.getCentrePoints(canvas.width/PPI, canvas.height/PPI)
-      .forEach(point => canvas.center(point[0]*PPI, point[1]*PPI).circle(r));
+    this.getCentres(canvas.width/PPI, canvas.height/PPI)
+      .forEach(coords => canvas.center(coords[0]*PPI, coords[1]*PPI).circle(r));
 
     return this;
   },
 
+  // 可用属性
+  getAvailableProps: function() {
+    return ['size','centers'];
+  },
+
+  // 可用形制
+  getAvailablePatterns: function() {
+    return ['d60','d45','d90'];
+  },
+
   // 文字描述
-  description: function() {
+  getDescription: function() {
     const params = this._params;
     const pattern = params.pattern == 'd90' ? 'Straight' : 'Staggered';
     return `${params.size}" Diameter ${params.centers}" ${pattern} Centers`;
   },
 
   // 孔面积
-  slotArea: function() {
+  getSlotArea: function() {
     const r = this._params.size/2;
     return PI*r*r;
   },

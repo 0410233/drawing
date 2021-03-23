@@ -30,33 +30,21 @@ if (typeof Object.assign !== 'function') {
   });
 }
 
+const PI = Math.PI;
+const RAD = PI/180;
+const cos = Math.cos;
+const sin = Math.sin;
+const abs = Math.abs;
+
+// px per inch
+const PPI = 96;
+
 // classExtend
 Function.prototype.classExtend = function classExtend(supper, methods) {
   this.prototype = Object.assign(Object.create(supper.prototype), {
     constructor: this,
   }, methods || {});
 };
-
-// 翻译函数
-const __ = (function() {
-  const translations = {
-    'Slot 仅供继承': 'Slot 仅供继承',
-    '方法必须重写': '方法必须重写',
-    '孔径无效': '孔径无效',
-    '形制无效': '形制无效',
-    '中心距无效': '中心距无效',
-    '方法必须重写': '方法必须重写',
-    '方法必须重写': '方法必须重写',
-  };
-
-  return function __(text) {
-    return translations[text] || text;
-  }
-})();
-
-function i(num) {
-  return Math.round(num);
-}
 
 function render(template, parameters) {
   return template.replace(/\{.*?\}/g, match => {
@@ -65,19 +53,11 @@ function render(template, parameters) {
   });
 }
 
-function inchToPx(inch) {
-  return inch*100;
+function n(val) {
+  val = Number(val);
+  return isNaN(val) ? 0 : Math.abs(val);
 }
 
-function toNumber(val) {
-  val = typeof val === 'number' ? val : parseFloat(val);
-  return isFinite(val) ? val : 0;
+function i(num) {
+  return Math.round(num);
 }
-
-const PI = Math.PI;
-const RAD = PI/180;
-const cos = Math.cos;
-const sin = Math.sin;
-
-// px per inch
-const PPI = 100;

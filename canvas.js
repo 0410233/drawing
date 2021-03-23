@@ -133,21 +133,6 @@ Canvas.prototype = {
     return this;
   },
 
-  // // 批量勾画孔型
-  // printSlots: function printSlots(slot) {
-  //   this.clear();
-  //   slot.onCanvas(this);
-
-  //   let count = 0;
-  //   while (slot.draw(this)) {
-  //     if (++count > 5) {
-  //       // break;
-  //     }
-  //   }
-
-  //   return this;
-  // },
-
   // 清空画布
   clear: function clear() {
     this.context.clearRect(0, 0, this.width, this.height);

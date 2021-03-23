@@ -14,34 +14,47 @@
     </div>
     <div id="controller">
       <div class="form">
-        <div class="fields slot-type-fields">
-          <div class="field radio-field" v-for="(meta, name) in types">
-            <input type="radio" v-model="slot.type" :value="name" :id="'slot_type__'+name"><label :for="'slot_type__'+name">{{ meta.label }}</label>
+        <div class="fields">
+          <div class="field radio-field" v-for="(meta, name) in slots">
+            <input type="radio" v-model="slot.name" :value="name" :id="'slot__'+name"><label :for="'slot__'+name">{{ meta.label }}</label>
           </div>
         </div>
         <div class="fields slot-layout-fields">
-          <div class="field input-field" v-if="typeProps.indexOf('size') >= 0">
+          <div class="field input-field" v-if="availableProps.indexOf('size') >= 0">
             <label for="slot_size">Hole Size:</label><input type="number" v-model="slot.size" id="slot_size">
           </div>
-          <div class="field input-field" v-if="typeProps.indexOf('centers') >= 0">
+          <div class="field input-field" v-if="availableProps.indexOf('centers') >= 0">
             <label for="slot_centers">Centers:</label><input type="number" v-model="slot.centers" id="slot_centers">
           </div>
-          <div class="field input-field" v-if="typeProps.indexOf('height') >= 0">
+          <div class="field input-field" v-if="availableProps.indexOf('height') >= 0">
             <label for="slot_height">Slot Width:</label><input type="number" v-model="slot.height" id="slot_height">
           </div>
-          <div class="field input-field" v-if="typeProps.indexOf('width') >= 0">
+          <div class="field input-field" v-if="availableProps.indexOf('width') >= 0">
             <label for="slot_width">Slot Length:</label><input type="number" v-model="slot.width" id="slot_width">
           </div>
-          <div class="field input-field" v-if="typeProps.indexOf('vert_gutter') >= 0">
+          <div class="field input-field" v-if="availableProps.indexOf('vert_gutter') >= 0">
             <label for="vert_gutter">Side Bar:</label><input type="number" v-model="slot.vert_gutter" id="slot_vert_gutter">
           </div>
-          <div class="field input-field" v-if="typeProps.indexOf('hori_gutter') >= 0">
+          <div class="field input-field" v-if="availableProps.indexOf('hori_gutter') >= 0">
             <label for="hori_gutter">End Bar:</label><input type="number" v-model="slot.hori_gutter" id="slot_hori_gutter">
           </div>
         </div>
         <div class="fields">
-          <div class="field radio-field" v-for="pattern in typePatterns">
+          <div class="field radio-field" v-for="pattern in availablePatterns">
             <input type="radio" v-model="slot.pattern" :value="pattern.name" :id="'pattern__'+pattern.name"><label :for="'pattern__'+pattern.name">{{ pattern.label }}</label>
+          </div>
+          <hr>
+          <div class="field radio-field">
+            <input type="radio" v-model="slot.finish_type" value="unfinished" id="finish_type__unfinished"><label for="finish_type__unfinished">Unfinished</label>
+          </div>
+          <div class="field radio-field" v-if="slot.pattern!='d90'">
+            <input type="radio" v-model="slot.finish_type" value="finished_random" id="finish_type__finished_random"><label for="finish_type__finished_random">Finished Random</label>
+          </div>
+          <div class="field radio-field" v-if="slot.pattern!='d90'">
+            <input type="radio" v-model="slot.finish_type" value="finished_square" id="finish_type__finished_square"><label for="finish_type__finished_square">Finished Square</label>
+          </div>
+          <div class="field radio-field" v-if="slot.pattern=='d90'">
+            <input type="radio" v-model="slot.finish_type" value="finished" id="finish_type__finished"><label for="finish_type__finished">Finished</label>
           </div>
         </div>
         <button id="btn_draw" class="btn" @click.stop="draw">Draw</button>
@@ -73,7 +86,7 @@
       data: function() {
         return {
           slot: {
-            type: 'round',
+            name: 'RoundSlot',
             pattern: 'd60',
             size: null,
             centers: null,
@@ -81,6 +94,7 @@
             height: null,
             vert_gutter: null,
             hori_gutter: null,
+            finish_type: 'unfinished',
           },
           message: {
             error: null,
@@ -88,31 +102,26 @@
             psi: null,
             oa: null,
           },
-          types: {
-            'round': {
+          slots: {
+            'RoundSlot': {
               label: 'Round',
-              props: ['size','centers'],
-              patterns: ['d60','d45','d90'],
+              slot: new RoundSlot(),
             },
-            'square': {
+            'SquareSlot': {
               label: 'Square',
-              props: ['size','centers'],
-              patterns: ['d60','d45','d90'],
+              slot: new SquareSlot(),
             },
-            'hex': {
+            'HexSlot': {
               label: 'Hex',
-              props: ['size','centers'],
-              patterns: ['d60','d45','d90'],
+              slot: new HexSlot(),
             },
-            'square-end': {
-              label: 'Square End',
-              props: ['width','height','vert_gutter','hori_gutter'],
-              patterns: ['hori','vert','d90'],
+            'RoundEndSlot': {
+              label: 'Round End Slot',
+              slot: new RoundEndSlot(),
             },
-            'round-end': {
-              label: 'Round End',
-              props: ['width','height','vert_gutter','hori_gutter'],
-              patterns: ['hori','vert','d90'],
+            'SquareEndSlot': {
+              label: 'Square End Slot',
+              slot: new SquareEndSlot(),
             },
           },
           patterns: {
@@ -126,18 +135,21 @@
       },
 
       computed: {
-        typeProps: function() {
-          const meta = this.types[this.slot.type];
-          return meta && meta.props || [];
+        availableProps: function() {
+          return this.currentSlot.getAvailableProps();
         },
 
-        typePatterns: function() {
-          const meta = this.types[this.slot.type];
-          if (!meta) {
-            return [];
+        availablePatterns: function() {
+          const patterns = this.currentSlot.getAvailablePatterns();
+          if (patterns.indexOf(this.slot.pattern) < 0) {
+            this.slot.pattern = patterns[0];
           }
-          const patterns = this.patterns;
-          return meta.patterns.map(pattern => {return {name:pattern,label:patterns[pattern]}});
+          const labels = this.patterns;
+          return patterns.map(pattern => {return {name:pattern,label:labels[pattern]}});
+        },
+
+        currentSlot: function() {
+          return this.slots[this.slot.name].slot;
         },
       },
 
@@ -151,80 +163,26 @@
 
           const props = {
             pattern: this.slot.pattern,
+            finish_type: this.slot.finish_type,
           };
-          this.typeProps.forEach(prop => {
-            props[prop] = parseFloat(this.slot[prop]) || 0;
+          this.availableProps.forEach(prop => {
+            props[prop] = n(this.slot[prop]);
           });
 
-          let slot = null;
-          try {
-            switch (this.slot.type) {
-              case 'round':
-                slot = new RoundSlot(props);
-                break;
-              case 'square':
-                slot = new SquareSlot(props);
-                break;
-              case 'hex':
-                slot = new HexSlot(props);
-                break;
-              case 'round-end':
-                slot = new RoundEndSlot(props);
-                break;
-              case 'square-end':
-                slot = new SquareEndSlot(props);
-                break;
-            }
-            if (slot) {
-              canvas.clear().fillStyle('#0d4c61');
-              slot.draw(canvas);
-              msg.desc = slot.description();
-              msg.psi = slot.holesPerSquareInch();
-              msg.oa = slot.openArea();
-            }
-          } catch (error) {
+          const slot = this.currentSlot;
+          const error = slot.init(props).validate();
+          if (error) {
             this.message.error = error;
-            console.error(error);
+          } else {
+            canvas.clear().fillStyle('#0d4c61');
+            slot.draw(canvas);
+            msg.desc = slot.getDescription();
+            msg.psi = slot.getHolesPerSquareInch();
+            msg.oa = slot.getOpenArea();
           }
         },
       },
     });
-
-    // const square = new SquareSlot({
-    //   size: 60,
-    //   centers: 120,
-    //   pattern: 'd45',
-    // });
-
-    // const round = new RoundSlot({
-    //   size: 60,
-    //   centers: 120,
-    //   pattern: 'd45',
-    // });
-
-    // const hex = new HexSlot({
-    //   size: 40,
-    //   centers: 80,
-    //   pattern: 'd90',
-    // });
-
-    // const squareEnd = new SquareEndSlot({
-    //   width: 80,
-    //   height: 40,
-    //   hori_gutter: 40,
-    //   vert_gutter: 20,
-    //   pattern: 'hori',
-    // });
-
-    // const roundEnd = new RoundEndSlot({
-    //   width: 80,
-    //   height: 40,
-    //   hori_gutter: 40,
-    //   vert_gutter: 20,
-    //   pattern: 'hori',
-    // });
-
-    // canvas.fillStyle('#0d4c61').printSlots(hex);
   </script>
 </body>
 </html>
