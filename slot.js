@@ -1,7 +1,7 @@
 
 // Slot 基类
 function Slot() {
-  this._validated = false;
+  //
 }
 
 Slot.prototype = {
@@ -75,8 +75,6 @@ Slot.prototype = {
 
   // 验证参数
   validate: function() {
-    this._validated = false;
-
     const params = this._params;
 
     // 验证尺寸
@@ -100,8 +98,6 @@ Slot.prototype = {
         return '中心距必须大于 0';
       }
     }
-
-    this._validated = true;
 
     return '';
   },
