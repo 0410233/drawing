@@ -32,11 +32,11 @@
           <div class="field input-field" v-if="availableProps.indexOf('width') >= 0">
             <label for="slot_width">Slot Length:</label><input type="number" v-model="slot.width" id="slot_width" @keypress="checkNumber">
           </div>
-          <div class="field input-field" v-if="availableProps.indexOf('vert_gutter') >= 0">
-            <label for="vert_gutter">Side Bar:</label><input type="number" v-model="slot.vert_gutter" id="slot_vert_gutter" @keypress="checkNumber">
+          <div class="field input-field" v-if="availableProps.indexOf('gap_y') >= 0">
+            <label for="gap_y">Side Bar:</label><input type="number" v-model="slot.gap_y" id="slot_gap_y" @keypress="checkNumber">
           </div>
-          <div class="field input-field" v-if="availableProps.indexOf('hori_gutter') >= 0">
-            <label for="hori_gutter">End Bar:</label><input type="number" v-model="slot.hori_gutter" id="slot_hori_gutter" @keypress="checkNumber">
+          <div class="field input-field" v-if="availableProps.indexOf('gap_x') >= 0">
+            <label for="gap_x">End Bar:</label><input type="number" v-model="slot.gap_x" id="slot_gap_x" @keypress="checkNumber">
           </div>
         </div>
         <div class="fields">
@@ -48,10 +48,10 @@
             <input type="radio" v-model="slot.finish_type" value="unfinished" id="finish_type__unfinished"><label for="finish_type__unfinished">Unfinished</label>
           </div>
           <div class="field radio-field" v-if="slot.pattern!='d90'">
-            <input type="radio" v-model="slot.finish_type" value="finished_random" id="finish_type__finished_random"><label for="finish_type__finished_random">Finished Random</label>
+            <input type="radio" v-model="slot.finish_type" value="random" id="finish_type__random"><label for="finish_type__random">Finished Random</label>
           </div>
           <div class="field radio-field" v-if="slot.pattern!='d90'">
-            <input type="radio" v-model="slot.finish_type" value="finished_square" id="finish_type__finished_square"><label for="finish_type__finished_square">Finished Square</label>
+            <input type="radio" v-model="slot.finish_type" value="square" id="finish_type__square"><label for="finish_type__square">Finished Square</label>
           </div>
           <div class="field radio-field" v-if="slot.pattern=='d90'">
             <input type="radio" v-model="slot.finish_type" value="finished" id="finish_type__finished"><label for="finish_type__finished">Finished</label>
@@ -92,8 +92,8 @@
             centers: null,
             width: null,
             height: null,
-            vert_gutter: null,
-            hori_gutter: null,
+            gap_y: null,
+            gap_x: null,
             finish_type: 'unfinished',
           },
           message: {

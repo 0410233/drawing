@@ -19,7 +19,7 @@ SquareEndSlot.classExtend(Slot, {
 
   // 可用属性
   getAvailableProps: function() {
-    return ['width','height','vert_gutter','hori_gutter'];
+    return ['width','height','gap_y','gap_x'];
   },
 
   // 可用形制
@@ -30,7 +30,7 @@ SquareEndSlot.classExtend(Slot, {
   // 文字描述
   getDescription: function() {
     const params = this._params;
-    const msg = render('{width}" X {height}" Rectangular Slot with {vert_gutter}" Side Bars and {hori_gutter} End Bars', params);
+    const msg = render('{width}" X {height}" Rectangular Slot with {gap_y}" Side Bars and {gap_x} End Bars', params);
     switch (params.pattern) {
       case 'vert':
         return msg+', End Staggered';

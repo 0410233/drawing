@@ -12,8 +12,8 @@ Slot.prototype = {
   init: function(params) {
     params.size = n(params.size);
     params.centers = n(params.centers);
-    params.hori_gutter = n(params.hori_gutter);
-    params.vert_gutter = n(params.vert_gutter);
+    params.gap_x = n(params.gap_x);
+    params.gap_y = n(params.gap_y);
 
     this._params = params;
 
@@ -33,40 +33,42 @@ Slot.prototype = {
     return this;
   },
 
-  // 计算孔距
+  // 计算 dx/dy
+  // dx: 水平方向相邻孔间距
+  // dy: 垂直方向相邻行间距
   calculateDistance: function() {
     const params = this._params;
 
     const centers = params.centers;
     const width = params.width;
     const height = params.height;
-    const gutterX = params.hori_gutter;
-    const gutterY = params.vert_gutter;
+    const gapX = params.gap_x;
+    const gapY = params.gap_y;
 
     switch (params.pattern) {
       case 'd60':
         params.dx = centers*cos(60*RAD)*2;
-        params.dy = centers*sin(60*RAD)*2;
+        params.dy = centers*sin(60*RAD);
         break;
 
       case 'd45':
         params.dx = centers*cos(45*RAD)*2;
-        params.dy = centers*sin(45*RAD)*2;
+        params.dy = centers*sin(45*RAD);
         break;
 
       case 'hori':
-        params.dx = width+gutterX;
-        params.dy = (height+gutterY)*2;
+        params.dx = width+gapX;
+        params.dy = height+gapY;
         break;
 
       case 'vert':
-        params.dx = (width+gutterX)*2;
-        params.dy = height+gutterY;
+        params.dx = (width+gapX)*2;
+        params.dy = (height+gapY)/2;
         break;
 
       case 'd90':
-        params.dx = centers || (width+gutterX);
-        params.dy = centers || (height+gutterY);
+        params.dx = centers || (width+gapX);
+        params.dy = centers || (height+gapY);
         break;
     }
 
@@ -94,7 +96,7 @@ Slot.prototype = {
         return render('中心距必须大于 {min}', {min: min.toFixed(2)});
       }
     } else {
-      if (params.hori_gutter <= 0 || params.vert_gutter <= 0) {
+      if (params.gap_x <= 0 || params.gap_y <= 0) {
         return '中心距必须大于 0';
       }
     }
@@ -107,14 +109,14 @@ Slot.prototype = {
     return this._params.size;
   },
 
-  // 获取每列第一个中心点
+  // 获取所有孔的中心点的坐标
   getCentres: function(width, height) {
     const params = this._params;
     const finish = params.finish_type;
     const h = params.height/2;
     const w = params.width/2;
     const dx = params.dx;
-    const dy = params.pattern == 'd90' ? params.dy : params.dy/2;
+    const dy = params.dy;
 
     const xCoords = [w, w];
     if (params.pattern != 'd90') {
@@ -125,7 +127,7 @@ Slot.prototype = {
       xCoords[1] += dx;
     }
 
-    const finishMode = finish == 'finished_square' ? 1 : 0;
+    const finishMode = finish == 'square' ? 1 : 0;
 
     const centres = [];
     let row = 0, x = 0, y = h;
@@ -171,101 +173,12 @@ Slot.prototype = {
   // 获取开孔率
   getOpenArea: function() {
     const params = this._params;
-    const count = params.pattern == 'd90' ? 1 : 2;
-    return this.getSlotArea()*count/(params.dx*params.dy);
+    return this.getSlotArea()/(params.dx*params.dy);
   },
 
   // 获取每平方英寸开孔数
   getHolesPerSquareInch: function() {
-    return this.getOpenArea()/this.getSlotArea();
+    const params = this._params;
+    return 1/(params.dx*params.dy);
   },
-
-
-  /////////////////////////////////////////////////////////////////////////////////////////////////
-
-  // // 计算起始点
-  // prepareOrigin: function() {
-  //   const params = this._params;
-  //   this._origin = [params.width/2, params.height/2];
-
-  //   return this;
-  // },
-
-  // // 计算相邻坐标偏移量
-  // prepareDelta: function() {
-  //   const centers = this._params.centers;
-  //   this._delta = [[centers, 0]];
-  //   switch (this._params.pattern) {
-  //     case 'd60':
-  //       this._delta.push(
-  //         [-1*centers*cos(60*RAD), -1*centers*sin(60*RAD)],
-  //         [-1*centers*cos(60*RAD), centers*sin(60*RAD)]
-  //       );
-  //       break;
-
-  //     case 'd45':
-  //       this._delta.push(
-  //         [-1*centers*cos(45*RAD), -1*centers*sin(45*RAD)],
-  //         [-1*centers*cos(45*RAD), centers*sin(45*RAD)]
-  //       );
-  //       break;
-
-  //     case 'd90':
-  //       this._delta.push(
-  //         [0, -centers],
-  //         [-centers, 0],
-  //         [0, centers]
-  //       );
-  //       break;
-  //   }
-  //   return this;
-  // },
-
-  // // 获取指定范围内所有可用的坐标
-  // getCentres: function(width, height) {
-  //   const points = [];
-  //   const cache = {};
-
-  //   const origin = this._origin.slice();
-  //   points.push(origin);
-  //   cache[origin.join(',')] = true;
-
-  //   let related = [], fresh = [origin];
-  //   while (true) {
-  //     related = [];
-  //     fresh.forEach(coords => {
-  //       related = related.concat(this.relatedCentrePoints(coords[0], coords[1]));
-  //     });
-
-  //     fresh = [];
-  //     related.forEach(coords => {
-  //       coords = [n(coords[0].toFixed(6)), n(coords[1].toFixed(6))];
-  //       const key = coords.join(',');
-  //       if (!cache[key] && this.isValidCentre(coords[0], coords[1], width, height)) {
-  //         cache[key] = true;
-  //         points.push(coords);
-  //         fresh.push(coords)
-  //       }
-  //     });
-
-  //     if (! fresh.length) {
-  //       break;
-  //     }
-  //   }
-
-  //   return points;
-  // },
-
-  // // 获取与指定坐标相邻的坐标
-  // getRelatedCentrePoints: function(x, y) {
-  //   return this._delta.map(delta => [x+delta[0], y+delta[1]]);
-  // },
-
-  // isValidCentre: function(x, y, width, height) {
-  //   const minX = this._params.width/2;
-  //   const minY = this._params.height/2;
-
-  //   return (Math.abs(x) < minX || Math.abs(x-width) < minX) && (Math.abs(y) < minY || Math.abs(y-height) < minY);
-  // },
-
 };
