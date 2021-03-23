@@ -125,7 +125,7 @@ Slot.prototype = {
       xCoords[1] += dx;
     }
 
-    const finishMode = 'finished_square' ? 1 : 0;
+    const finishMode = finish == 'finished_square' ? 1 : 0;
 
     const centres = [];
     let row = 0, x = 0, y = h;

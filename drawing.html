@@ -21,22 +21,22 @@
         </div>
         <div class="fields slot-layout-fields">
           <div class="field input-field" v-if="availableProps.indexOf('size') >= 0">
-            <label for="slot_size">Hole Size:</label><input type="number" v-model="slot.size" id="slot_size">
+            <label for="slot_size">Hole Size:</label><input type="number" v-model="slot.size" id="slot_size" @keypress="checkNumber">
           </div>
           <div class="field input-field" v-if="availableProps.indexOf('centers') >= 0">
-            <label for="slot_centers">Centers:</label><input type="number" v-model="slot.centers" id="slot_centers">
+            <label for="slot_centers">Centers:</label><input type="number" v-model="slot.centers" id="slot_centers" @keypress="checkNumber">
           </div>
           <div class="field input-field" v-if="availableProps.indexOf('height') >= 0">
-            <label for="slot_height">Slot Width:</label><input type="number" v-model="slot.height" id="slot_height">
+            <label for="slot_height">Slot Width:</label><input type="number" v-model="slot.height" id="slot_height" @keypress="checkNumber">
           </div>
           <div class="field input-field" v-if="availableProps.indexOf('width') >= 0">
-            <label for="slot_width">Slot Length:</label><input type="number" v-model="slot.width" id="slot_width">
+            <label for="slot_width">Slot Length:</label><input type="number" v-model="slot.width" id="slot_width" @keypress="checkNumber">
           </div>
           <div class="field input-field" v-if="availableProps.indexOf('vert_gutter') >= 0">
-            <label for="vert_gutter">Side Bar:</label><input type="number" v-model="slot.vert_gutter" id="slot_vert_gutter">
+            <label for="vert_gutter">Side Bar:</label><input type="number" v-model="slot.vert_gutter" id="slot_vert_gutter" @keypress="checkNumber">
           </div>
           <div class="field input-field" v-if="availableProps.indexOf('hori_gutter') >= 0">
-            <label for="hori_gutter">End Bar:</label><input type="number" v-model="slot.hori_gutter" id="slot_hori_gutter">
+            <label for="hori_gutter">End Bar:</label><input type="number" v-model="slot.hori_gutter" id="slot_hori_gutter" @keypress="checkNumber">
           </div>
         </div>
         <div class="fields">
@@ -154,6 +154,13 @@
       },
 
       methods: {
+        checkNumber: function(event) {
+          // 不允许正负号
+          if (event.key == '-' || event.key == '+') {
+            event.preventDefault();
+          }
+        },
+
         draw: function() {
           const msg = this.message;
           msg.error = null;
