@@ -53,12 +53,12 @@ Canvas.prototype = {
   rect: function rect(width, height) {
     const context = this.context;
 
-    const x = i(this._centerX - width/2);
-    const y = i(this._centerY - height/2);
+    const x = this._centerX;
+    const y = this._centerY;
 
     context.save();
     context.fillStyle = this._fillStyle;
-    context.fillRect(x, y, i(width), i(height));
+    context.fillRect(toInt(x-width/2), toInt(y-height/2), toInt(width), toInt(height));
     context.restore();
 
     return this;
@@ -68,14 +68,13 @@ Canvas.prototype = {
   circle: function circle(r) {
     const context = this.context;
 
-    const x = i(this._centerX);
-    const y = i(this._centerY);
-    r = i(r);
+    const x = this._centerX;
+    const y = this._centerY;
 
     context.save();
     context.beginPath();
     context.fillStyle = this._fillStyle;
-    context.arc(x, y, r, 0, 2*Math.PI);
+    context.arc(toInt(x), toInt(y), toInt(r), 0, 2*Math.PI);
     context.closePath();
     context.fill();
     context.restore();
@@ -87,23 +86,19 @@ Canvas.prototype = {
   hex: function hex(r) {
     const context = this.context;
 
-    const x = i(this._centerX);
-    const y = i(this._centerY - r);
-
-    const rcos = i(r*Math.cos(Math.PI/6));
-    const rsin = i(r/2);
-
-    r = i(r);
+    const x = this._centerX;
+    const y = this._centerY;
+    const a = 60*RAD;
 
     context.save();
     context.fillStyle = this._fillStyle;
     context.beginPath();
-    context.moveTo(x, y);
-    context.lineTo(x + rcos, y + rsin);
-    context.lineTo(x + rcos, y + rsin + r);
-    context.lineTo(x, y + 2*r);
-    context.lineTo(x - rcos, y + rsin + r);
-    context.lineTo(x - rcos, y + rsin);
+
+    context.moveTo(toInt(x), toInt(y));
+    for (let i = 0; i <= 6; i++) {
+      context.lineTo(toInt(x + r*cos(i*a)), toInt(y + r*sin(i*a)));
+    }
+
     context.closePath();
     context.fill();
     context.restore();
@@ -116,16 +111,18 @@ Canvas.prototype = {
     const context = this.context;
 
     const x = this._centerX;
-    const y = this._centerY - height/2;
+    const y = this._centerY;
+    const dx = width/2;
+    const dy = height/2;
 
     context.save();
     context.fillStyle = this._fillStyle;
     context.beginPath();
-    context.moveTo(i(x), i(y));
-    context.arcTo(i(x+width/2), i(y), i(x+width/2), i(y+height/2), i(radius));
-    context.arcTo(i(x+width/2), i(y+height), i(x), i(y+height), i(radius));
-    context.arcTo(i(x-width/2), i(y+height), i(x-width/2), i(y+height/2), i(radius));
-    context.arcTo(i(x-width/2), i(y), i(x), i(y), i(radius));
+    context.moveTo(toInt(x), toInt(y-dy));
+    context.arcTo(toInt(x+dx), toInt(y-dy), toInt(x+dx), toInt(y), radius);
+    context.arcTo(toInt(x+dx), toInt(y+dy), toInt(x), toInt(y+dy), radius);
+    context.arcTo(toInt(x-dx), toInt(y+dy), toInt(x-dx), toInt(y), radius);
+    context.arcTo(toInt(x-dx), toInt(y-dy), toInt(x), toInt(y-dy), radius);
     context.closePath();
     context.fill();
     context.restore();

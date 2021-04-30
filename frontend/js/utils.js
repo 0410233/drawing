@@ -30,6 +30,25 @@ if (typeof Object.assign !== 'function') {
   });
 }
 
+if (!HTMLCanvasElement.prototype.toBlob) {
+  Object.defineProperty(HTMLCanvasElement.prototype, 'toBlob', {
+    value: function (callback, type, quality) {
+      var canvas = this;
+      setTimeout(function() {
+        var binStr = atob( canvas.toDataURL(type, quality).split(',')[1] );
+        var len = binStr.length;
+        var arr = new Uint8Array(len);
+
+        for (var i = 0; i < len; i++) {
+          arr[i] = binStr.charCodeAt(i);
+        }
+
+        callback(new Blob([arr], { type: type || 'image/png' }));
+      });
+    }
+  });
+}
+
 const PI = Math.PI;
 const RAD = PI/180;
 const cos = Math.cos;
@@ -47,17 +66,17 @@ Function.prototype.classExtend = function classExtend(supper, methods) {
 };
 
 function render(template, parameters) {
-  return template.replace(/\{.*?\}/g, match => {
+  return template.replace(/\{.*?\}/g, function(match) {
     const m = match.slice(1,-1).trim();
     return parameters[m] != null ? parameters[m] : match;
   });
 }
 
-function n(val) {
+function toNumber(val) {
   val = Number(val);
-  return isNaN(val) ? 0 : Math.abs(val);
+  return isNaN(val) ? 0 : val;
 }
 
-function i(num) {
+function toInt(num) {
   return Math.round(num);
 }

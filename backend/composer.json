@@ -1,0 +1,12 @@
+{
+    "require": {
+        "dompdf/dompdf": "^1.0",
+        "twig/twig": "^3.3",
+        "symfony/http-foundation": "^5.2"
+    },
+    "autoload": {
+      "psr-4": {
+        "Drawing\\": "drawing/src/"
+      }
+    }
+}

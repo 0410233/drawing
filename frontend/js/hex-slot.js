@@ -6,9 +6,6 @@ function HexSlot(parameters) {
 
 HexSlot.classExtend(Slot, {
 
-  props: ['size','centers'],
-  patterns: ['d60','d45','d90'],
-
   // 计算孔尺寸
   calculateSize: function() {
     const params = this._params;
@@ -21,9 +18,10 @@ HexSlot.classExtend(Slot, {
 
   // 最小孔间距（中心距离）
   getMinCenters: function() {
-    const width = this._params.width;
-    const height = this._params.height;
-    switch (this._params.pattern) {
+    const params = this._params;
+    const width = params.width;
+    const height = params.height;
+    switch (params.pattern) {
       case 'd60':
         return width;
       case 'd45':
@@ -36,10 +34,12 @@ HexSlot.classExtend(Slot, {
 
   // 画孔
   draw: function(canvas) {
-    const r = this._radius*PPI;
+    const r = this._params.height*PPI/2;
 
     this.getCentres(canvas.width/PPI, canvas.height/PPI)
-      .forEach(point => canvas.center(point[0]*PPI, point[1]*PPI).hex(r));
+      .forEach(function(point) {
+        canvas.center(point[0]*PPI, point[1]*PPI).hex(r);
+      });
 
     return this;
   },
@@ -54,17 +54,23 @@ HexSlot.classExtend(Slot, {
     return ['d60','d45','d90'];
   },
 
+  // 获取名称（标签）
+  getName: function() {
+    return 'Hex';
+  },
+
   // 文字描述
   getDescription: function() {
     const params = this._params;
     const pattern = params.pattern == 'd90' ? 'Straight' : 'Staggered';
-    return `${params.size}" Hex ${params.centers}" ${pattern} Centers`;
+    return params.size + '" Hex '+params.centers+'" '+pattern+' Centers';
   },
 
   // 孔面积
   getSlotArea: function() {
-    const r = this._params.height/2;
-    const h = this._params.width/2;
+    const params = this._params;
+    const r = params.height/2;
+    const h = params.width/2;
     return r*h*3;
   },
 });

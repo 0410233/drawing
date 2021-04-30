@@ -13,7 +13,9 @@ RoundEndSlot.classExtend(SquareEndSlot, {
     const radius = height/2;
 
     this.getCentres(canvas.width/PPI, canvas.height/PPI)
-      .forEach(point => canvas.center(point[0]*PPI, point[1]*PPI).roundRect(width, height, radius));
+      .forEach(function(point) {
+        canvas.center(point[0]*PPI, point[1]*PPI).roundRect(width, height, radius);
+      });
 
     return this;
   },
@@ -26,6 +28,11 @@ RoundEndSlot.classExtend(SquareEndSlot, {
   // 可用形制
   getAvailablePatterns: function() {
     return ['hori','vert','d90'];
+  },
+
+  // 获取名称（标签）
+  getName: function() {
+    return 'Round End Slot';
   },
 
   // 文字描述

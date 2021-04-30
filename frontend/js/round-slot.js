@@ -10,7 +10,9 @@ RoundSlot.classExtend(Slot, {
     const r = this._params.size*PPI/2;
 
     this.getCentres(canvas.width/PPI, canvas.height/PPI)
-      .forEach(coords => canvas.center(coords[0]*PPI, coords[1]*PPI).circle(r));
+      .forEach(function(coords) {
+        canvas.center(coords[0]*PPI, coords[1]*PPI).circle(r);
+      });
 
     return this;
   },
@@ -25,11 +27,16 @@ RoundSlot.classExtend(Slot, {
     return ['d60','d45','d90'];
   },
 
+  // 获取名称（标签）
+  getName: function() {
+    return 'Round';
+  },
+
   // 文字描述
   getDescription: function() {
     const params = this._params;
     const pattern = params.pattern == 'd90' ? 'Straight' : 'Staggered';
-    return `${params.size}" Diameter ${params.centers}" ${pattern} Centers`;
+    return params.size + '" Diameter '+params.centers+'" '+pattern+' Centers';
   },
 
   // 孔面积

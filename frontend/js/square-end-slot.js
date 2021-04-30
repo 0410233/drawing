@@ -12,7 +12,9 @@ SquareEndSlot.classExtend(Slot, {
     const height = this._params.height*PPI;
 
     this.getCentres(canvas.width/PPI, canvas.height/PPI)
-      .forEach(point => canvas.center(point[0]*PPI, point[1]*PPI).rect(width, height));
+      .forEach(function(point) {
+        canvas.center(point[0]*PPI, point[1]*PPI).rect(width, height);
+      });
 
     return this;
   },
@@ -25,6 +27,11 @@ SquareEndSlot.classExtend(Slot, {
   // 可用形制
   getAvailablePatterns: function() {
     return ['hori','vert','d90'];
+  },
+
+  // 获取名称（标签）
+  getName: function() {
+    return 'Square End Slot';
   },
 
   // 文字描述

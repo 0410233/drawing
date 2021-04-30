@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canvas</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="canvas-wrapper">
+      <canvas id="plate" style="background-color: #ffffff;"></canvas>
+    </div>
+    <div id="controller">
+      <div class="form">
+        <div class="fields">
+          <div class="field radio-field" v-for="(meta, name) in slots">
+            <input type="radio" v-model="slot.name" :value="name" :id="'slot__'+name"><label :for="'slot__'+name">{{ meta.label }}</label>
+          </div>
+        </div>
+        <div class="fields slot-layout-fields">
+          <div class="field input-field" v-if="availableProps.indexOf('size') >= 0">
+            <label for="slot_size">Hole Size:</label>
+            <div class="input-group multi-units">
+              <input type="number" v-model="slot.size" id="slot_size" @keypress="checkNumber" @input="handleInchChange('size')">
+              <input type="number" v-model="mm.size" @keypress="checkNumber" @input="handleMmChange('size')">
+            </div>
+          </div>
+          <div class="field input-field" v-if="availableProps.indexOf('centers') >= 0">
+            <label for="slot_centers">Centers:</label>
+            <div class="input-group multi-units">
+              <input type="number" v-model="slot.centers" id="slot_centers" @keypress="checkNumber" @input="handleInchChange('centers')">
+              <input type="number" v-model="mm.centers" @keypress="checkNumber" @input="handleMmChange('centers')">
+            </div>
+          </div>
+          <div class="field input-field" v-if="availableProps.indexOf('height') >= 0">
+            <label for="slot_height">Slot Width:</label>
+            <div class="input-group multi-units">
+              <input type="number" v-model="slot.height" id="slot_height" @keypress="checkNumber" @input="handleInchChange('height')">
+              <input type="number" v-model="mm.height" @keypress="checkNumber" @input="handleMmChange('height')">
+            </div>
+          </div>
+          <div class="field input-field" v-if="availableProps.indexOf('width') >= 0">
+            <label for="slot_width">Slot Length:</label>
+            <div class="input-group multi-units">
+              <input type="number" v-model="slot.width" id="slot_width" @keypress="checkNumber" @input="handleInchChange('width')">
+              <input type="number" v-model="mm.width" @keypress="checkNumber" @input="handleMmChange('width')">
+            </div>
+          </div>
+          <div class="field input-field" v-if="availableProps.indexOf('gap_y') >= 0">
+            <label for="gap_y">Side Bar:</label>
+            <div class="input-group multi-units">
+              <input type="number" v-model="slot.gap_y" id="slot_gap_y" @keypress="checkNumber" @input="handleInchChange('gap_y')">
+              <input type="number" v-model="mm.gap_y" @keypress="checkNumber" @input="handleMmChange('gap_y')">
+            </div>
+          </div>
+          <div class="field input-field" v-if="availableProps.indexOf('gap_x') >= 0">
+            <label for="gap_x">End Bar:</label>
+            <div class="input-group multi-units">
+              <input type="number" v-model="slot.gap_x" id="slot_gap_x" @keypress="checkNumber" @input="handleInchChange('gap_x')">
+              <input type="number" v-model="mm.gap_x" @keypress="checkNumber" @input="handleMmChange('gap_x')">
+            </div>
+          </div>
+        </div>
+        <div class="fields">
+          <div class="field radio-field" v-for="pattern in availablePatterns">
+            <input type="radio" v-model="slot.pattern" :value="pattern.name" :id="'pattern__'+pattern.name"><label :for="'pattern__'+pattern.name">{{ pattern.label }}</label>
+          </div>
+          <hr>
+          <div class="field radio-field">
+            <input type="radio" v-model="slot.finish_type" value="unfinished" id="finish_type__unfinished"><label for="finish_type__unfinished">Unfinished</label>
+          </div>
+          <div class="field radio-field" v-if="slot.pattern!='d90'">
+            <input type="radio" v-model="slot.finish_type" value="random" id="finish_type__random"><label for="finish_type__random">Finished Random</label>
+          </div>
+          <div class="field radio-field" v-if="slot.pattern!='d90'">
+            <input type="radio" v-model="slot.finish_type" value="square" id="finish_type__square"><label for="finish_type__square">Finished Square</label>
+          </div>
+          <div class="field radio-field" v-if="slot.pattern=='d90'">
+            <input type="radio" v-model="slot.finish_type" value="finished" id="finish_type__finished"><label for="finish_type__finished">Finished</label>
+          </div>
+        </div>
+        <button id="btn_draw" class="btn" @click.stop="draw">Draw</button>
+        <button id="btn_download" class="btn" @click.stop="downloadAsPDF" v-if="drawed">Download PDF</button>
+        <div class="drawing-description" v-if="message.desc">
+          <div class="content"><b>{{ message.desc }}</b></div>
+          <div class="content">{{ message.psi.toFixed(2) }} Holes PSI</div>
+          <div class="content">{{ (message.oa*100).toFixed(2) }}% Open Area</div>
+        </div>
+      </div>
+      <div class="error" v-if="message.error">{{ message.error }}</div>
+      <div class="loading" v-if="loading"><span>正在生成 PDF ...</span></div>
+    </div>
+  </div>
+
+  <script src="./js/utils.js"></script>
+  <script src="./js/slot.js"></script>
+  <script src="./js/round-slot.js"></script>
+  <script src="./js/square-slot.js"></script>
+  <script src="./js/hex-slot.js"></script>
+  <script src="./js/square-end-slot.js"></script>
+  <script src="./js/round-end-slot.js"></script>
+  <script src="./js/canvas.js"></script>
+  <script src="./js/polyfill.min.js"></script>
+  <script src="./js/vendor/vue/vue.min.js"></script>
+  <script src="./js/vendor/axios/axios.min.js"></script>
+  <script src="./js/main.js"></script>
+</body>
+</html>

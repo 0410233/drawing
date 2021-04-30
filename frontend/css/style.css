@@ -56,7 +56,7 @@
 }
 .field input[type="number"] {
   height: 22px;
-  width: 120px;
+  width: 100px;
 }
 .field input {
   margin: 0;
@@ -88,11 +88,43 @@
 }
 
 .drawing-description {
-  max-width: 300px;
+  max-width: 280px;
   margin: 5px;
   margin-left: auto;
 }
 
 .drawing-description .content {
   margin-bottom: 5px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, .8);
+  z-index: 1001;
+}
+
+.loading > span {
+  display: block;
+  color: #2196f3;
+  font-size: 22px;
+}
+
+.input-group > input {
+  position: relative;
+}
+
+.input-group > input:first-child::after {
+  content: "inch";
+  position: absolute;
+  height: 100%;
+  background-color: #f1f1f1;
+  padding: 3px;
+  right: 0;
 }

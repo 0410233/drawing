@@ -27,7 +27,9 @@ SquareSlot.classExtend(Slot, {
     const r = this._params.size*PPI;
 
     this.getCentres(canvas.width/PPI, canvas.height/PPI)
-      .forEach(point => canvas.center(point[0]*PPI, point[1]*PPI).rect(r, r));
+      .forEach(function(point) {
+        canvas.center(point[0]*PPI, point[1]*PPI).rect(r, r);
+      });
 
     return this;
   },
@@ -42,11 +44,16 @@ SquareSlot.classExtend(Slot, {
     return ['d60','d45','d90'];
   },
 
+  // 获取名称（标签）
+  getName: function() {
+    return 'Square';
+  },
+
   // 文字描述
   getDescription: function() {
     const params = this._params;
     const pattern = params.pattern == 'd90' ? 'Straight' : 'Staggered';
-    return `${params.size}" Square ${params.centers}" ${pattern} Centers`;
+    return params.size + '" Square '+params.centers+'" '+pattern+' Centers';
   },
 
   // 孔面积

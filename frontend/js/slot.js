@@ -10,10 +10,10 @@ Slot.prototype = {
   // 初始化
   // 由已知参数计算其它必要参数
   init: function(params) {
-    params.size = n(params.size);
-    params.centers = n(params.centers);
-    params.gap_x = n(params.gap_x);
-    params.gap_y = n(params.gap_y);
+    params.size = toNumber(params.size);
+    params.centers = toNumber(params.centers);
+    params.gap_x = toNumber(params.gap_x);
+    params.gap_y = toNumber(params.gap_y);
 
     this._params = params;
 
@@ -27,8 +27,8 @@ Slot.prototype = {
   calculateSize: function() {
     const params = this._params;
 
-    params.width = params.width == null ? params.size : n(params.width);
-    params.height = params.height == null ? params.size : n(params.height);
+    params.width = params.width == null ? params.size : toNumber(params.width);
+    params.height = params.height == null ? params.size : toNumber(params.height);
 
     return this;
   },
@@ -157,6 +157,11 @@ Slot.prototype = {
   },
 
   getAvailablePatterns: function() {
+    throw render('{method} 方法必须重写', {method: arguments.callee.name});
+  },
+
+  // 获取名称（标签）
+  getName: function() {
     throw render('{method} 方法必须重写', {method: arguments.callee.name});
   },
 
